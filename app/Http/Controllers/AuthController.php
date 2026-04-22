@@ -81,10 +81,19 @@ class AuthController extends Controller
         $totalAnggota = Member::count();
         $totalPeminjaman = Transaction::count();
 
+        // GRAFIK DATA (Berdasarkan status transaksi)
+        $grafikStatus = [
+            'pending' => Transaction::where('status', 'pending')->count(),
+            'dipinjam' => Transaction::where('status', 'dipinjam')->count(),
+            'dikembalikan' => Transaction::where('status', 'dikembalikan')->count(),
+            'ditolak' => Transaction::where('status', 'ditolak')->count(),
+        ];
+
         return view('dashboard.index', compact(
             'totalBuku',
             'totalAnggota',
-            'totalPeminjaman'
+            'totalPeminjaman',
+            'grafikStatus'
         ));
     }
 

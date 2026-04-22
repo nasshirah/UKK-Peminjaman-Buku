@@ -17,40 +17,6 @@ class TransactionController extends Controller
         return view('transactions.index', compact('transactions'));
     }
 
-
-    public function create()
-    {
-        $members = Member::all();
-        $books = Book::all();
-
-        return view('transactions.create', compact('members','books'));
-    }
-
-
-    public function store(Request $request)
-    {
-        $book = Book::find($request->book_id);
-
-        // cek stok buku
-        if($book->stok <= 0){
-            return back()->with('error','Stok buku habis');
-        }
-
-        Transaction::create([
-            'member_id' => $request->member_id,
-            'book_id' => $request->book_id,
-            'tanggal_pinjam' => date('Y-m-d'),
-            'status' => 'dipinjam'
-        ]);
-
-        // stok buku berkurang
-        $book->stok -= 1;
-        $book->save();
-
-        return redirect('/transactions')->with('success','Buku berhasil dipinjam');
-    }
-
-
     public function kembali($id)
     {
         $transaction = Transaction::find($id);

@@ -51,6 +51,7 @@
             <a href="/books" class="{{ Request::is('books*') ? 'active' : '' }}"><i data-lucide="book-open"></i> Data Buku</a>
             <a href="/members" class="{{ Request::is('members*') ? 'active' : '' }}"><i data-lucide="users"></i> Data Anggota</a>
             <a href="/transactions" class="{{ Request::is('transactions*') ? 'active' : '' }}"><i data-lucide="arrow-left-right"></i> Transaksi</a>
+            <a href="{{ route('laporan.index') }}" class="{{ Request::is('laporan*') ? 'active' : '' }}"><i data-lucide="file-bar-chart"></i> Laporan</a>
             <div class="logout-link">
                 <hr class="mx-3 my-3 text-muted">
                 <a href="{{ route('logout') }}" class="text-danger"><i data-lucide="log-out"></i> Logout</a>

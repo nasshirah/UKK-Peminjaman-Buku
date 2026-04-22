@@ -4,286 +4,226 @@
 
 @section('content')
 
-{{-- Alert success --}}
+{{-- Alert notification --}}
 @if(session('success'))
-<div class="alert alert-dismissible fade show border-0 shadow-sm mb-4" role="alert"
-    style="border-radius: 12px; background: #ecfdf5; color: #065f46; border-left: 4px solid #10b981 !important;">
-    <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle-fill text-success fs-5"></i>
-        <span class="fw-medium">{{ session('success') }}</span>
+<div class="alert alert-dismissible fade show border-0 shadow-lg mb-4" role="alert"
+    style="border-radius: 16px; background: #ecfdf5; color: #065f46; border-left: 5px solid #10b981 !important;">
+    <div class="d-flex align-items-center gap-3 p-2">
+        <i class="bi bi-check-circle-fill fs-4 text-emerald"></i>
+        <div class="fw-semibold">{{ session('success') }}</div>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
 
-{{-- Alert error --}}
 @if(session('error'))
-<div class="alert alert-dismissible fade show border-0 shadow-sm mb-4" role="alert"
-    style="border-radius: 12px; background: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444 !important;">
-    <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-exclamation-circle-fill text-danger fs-5"></i>
-        <span class="fw-medium">{{ session('error') }}</span>
+<div class="alert alert-dismissible fade show border-0 shadow-lg mb-4" role="alert"
+    style="border-radius: 16px; background: #fef2f2; color: #991b1b; border-left: 5px solid #ef4444 !important;">
+    <div class="d-flex align-items-center gap-3 p-2">
+        <i class="bi bi-exclamation-circle-fill fs-4 text-danger"></i>
+        <div class="fw-semibold">{{ session('error') }}</div>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
 
-{{-- Header --}}
-<div class="d-flex justify-content-between align-items-center mb-4">
+{{-- Header Section --}}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 pb-2 border-bottom">
     <div>
-        <h4 class="fw-bold text-dark mb-1">Ajukan Peminjaman Buku</h4>
-        <p class="text-muted small mb-0">Pilih buku dan ajukan peminjaman. Admin akan menyetujui pengajuanmu.</p>
+        <h3 class="fw-bolder text-dark mb-1">Pinjam Buku</h3>
+        <p class="text-muted mb-0">Temukan buku favoritmu dan ajukan peminjaman dengan mudah.</p>
     </div>
-    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-medium">
-        <i class="bi bi-journal-arrow-up me-1"></i>
-        {{ $books->where('stok', '>', 0)->count() }} Buku Tersedia
-    </span>
+    <div class="mt-3 mt-md-0">
+        <span class="modern-badge badge-primary shadow-sm px-4 py-2 rounded-pill">
+            <i class="bi bi-journal-check me-2"></i> {{ $books->where('stok', '>', 0)->count() }} Buku Tersedia
+        </span>
+    </div>
 </div>
 
-
-{{-- ======================== STATUS PENGAJUAN SAYA ======================== --}}
+{{-- ======================== SEKSI PENGAJUAN AKTIF ======================== --}}
 @if($pengajuan->count() > 0)
-<div class="card border-0 shadow-sm mb-4" style="border-radius: 14px;">
-    <div class="card-header border-0 px-4 pt-4 pb-0 bg-transparent">
-        <div class="d-flex align-items-center gap-2 mb-3">
-            <i class="bi bi-list-check text-success fs-5"></i>
-            <h6 class="fw-bold mb-0">Status Pengajuan Saya</h6>
-            <span class="badge bg-secondary bg-opacity-10 text-secondary px-2 ms-1" style="font-size: 0.72rem;">
-                {{ $pengajuan->count() }} pengajuan
-            </span>
-        </div>
+<div class="mb-5">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <h5 class="fw-bolder text-dark mb-0">Status Pengajuan Terbaru</h5>
+        <span class="badge bg-light text-secondary rounded-pill fw-medium">{{ $pengajuan->count() }}</span>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr style="background: #f8f9fa;">
-                        <th class="ps-4 py-3 text-muted fw-medium border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">BUKU</th>
-                        <th class="py-3 text-muted fw-medium border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">TGL PINJAM</th>
-                        <th class="py-3 text-muted fw-medium border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">TGL KEMBALI</th>
-                        <th class="py-3 pe-4 text-muted fw-medium border-0 text-end" style="font-size: 0.78rem; letter-spacing: 0.4px;">STATUS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($pengajuan as $ajuan)
-                    <tr>
-                        <td class="ps-4 py-3">
-                            <div class="d-flex align-items-center gap-3">
-                                @if($ajuan->status == 'menunggu')
-                                    <div style="width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(249,115,22,0.1);">
-                                        <i class="bi bi-book-fill" style="font-size: 0.9rem; color: #f97316;"></i>
+
+    <div class="card border-0 premium-table-card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle custom-modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="border-0 fw-bold py-3 px-4 text-uppercase">Buku</th>
+                            <th class="border-0 fw-bold py-3 text-uppercase">Tgl Pinjam</th>
+                            <th class="border-0 fw-bold py-3 text-uppercase">Tgl Kembali</th>
+                            <th class="border-0 fw-bold py-3 px-4 text-end text-uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach($pengajuan as $ajuan)
+                        <tr class="table-row-hover">
+                            <td class="ps-4 py-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="modern-icon-box shadow-sm" style="background: #f8fafc; color: #3b82f6;">
+                                        <i class="bi bi-book-half fs-5"></i>
                                     </div>
-                                @elseif($ajuan->status == 'dipinjam')
-                                    <div style="width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(29,78,216,0.08);">
-                                        <i class="bi bi-book-fill" style="font-size: 0.9rem; color: #1d4ed8;"></i>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $ajuan->book->judul }}</div>
+                                        <div class="text-secondary small">{{ $ajuan->book->penulis }}</div>
                                     </div>
-                                @elseif($ajuan->status == 'ditolak')
-                                    <div style="width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(220,38,38,0.08);">
-                                        <i class="bi bi-book-fill" style="font-size: 0.9rem; color: #dc2626;"></i>
-                                    </div>
-                                @else
-                                    <div style="width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(21,128,61,0.1);">
-                                        <i class="bi bi-book-fill" style="font-size: 0.9rem; color: #15803d;"></i>
-                                    </div>
-                                @endif
-                                <div>
-                                    <div class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ $ajuan->book->judul }}</div>
-                                    <div class="text-muted" style="font-size: 0.78rem;">{{ $ajuan->book->penulis }}</div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="text-secondary" style="font-size: 0.85rem;">
-                            <i class="bi bi-calendar-event me-1 text-muted"></i>
-                            {{ \Carbon\Carbon::parse($ajuan->tanggal_pinjam)->format('d M Y') }}
-                        </td>
-                        <td class="text-secondary" style="font-size: 0.85rem;">
-                            @if($ajuan->tanggal_kembali)
-                                <i class="bi bi-calendar-check me-1 text-muted"></i>
-                                {{ \Carbon\Carbon::parse($ajuan->tanggal_kembali)->format('d M Y') }}
-                            @else
-                                <span class="text-muted">---</span>
-                            @endif
-                        </td>
-                        <td class="text-end pe-4">
-                            @if($ajuan->status == 'menunggu')
-                                <span class="badge rounded-pill px-3 py-2 fw-medium"
-                                    style="background: #fff7ed; color: #c2410c; font-size: 0.75rem;">
-                                    <i class="bi bi-hourglass-split me-1"></i> Menunggu Persetujuan
-                                </span>
-                            @elseif($ajuan->status == 'dipinjam')
-                                <span class="badge rounded-pill px-3 py-2 fw-medium"
-                                    style="background: #eff6ff; color: #1d4ed8; font-size: 0.75rem;">
-                                    <i class="bi bi-check-circle me-1"></i> Disetujui & Dipinjam
-                                </span>
-                            @elseif($ajuan->status == 'ditolak')
-                                <span class="badge rounded-pill px-3 py-2 fw-medium"
-                                    style="background: #fef2f2; color: #dc2626; font-size: 0.75rem;">
-                                    <i class="bi bi-x-circle me-1"></i> Ditolak
-                                </span>
-                            @else
-                                <span class="badge rounded-pill px-3 py-2 fw-medium"
-                                    style="background: #f0fdf4; color: #15803d; font-size: 0.75rem;">
-                                    <i class="bi bi-check-all me-1"></i> Dikembalikan
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            </td>
+                            <td class="text-secondary fw-semibold small">
+                                <i class="bi bi-calendar3 me-2 opacity-50"></i>{{ \Carbon\Carbon::parse($ajuan->tanggal_pinjam)->format('d M Y') }}
+                            </td>
+                            <td class="text-secondary fw-semibold small">
+                                @if($ajuan->tanggal_kembali)
+                                    <i class="bi bi-check2-circle me-2 opacity-50 text-success"></i>{{ \Carbon\Carbon::parse($ajuan->tanggal_kembali)->format('d M Y') }}
+                                @else
+                                    <span class="text-muted opacity-50">---</span>
+                                @endif
+                            </td>
+                            <td class="text-end pe-4">
+                                @if($ajuan->status == 'menunggu' || $ajuan->status == 'pending')
+                                    <span class="modern-badge badge-warning"><i class="bi bi-clock-history me-1"></i> Menunggu</span>
+                                @elseif($ajuan->status == 'dipinjam')
+                                    <span class="modern-badge badge-primary"><i class="bi bi-check2-all me-1"></i> Dipinjam</span>
+                                @elseif($ajuan->status == 'ditolak')
+                                    <span class="modern-badge badge-danger"><i class="bi bi-x-circle me-1"></i> Ditolak</span>
+                                @else
+                                    <span class="modern-badge badge-success"><i class="bi bi-arrow-return-left me-1"></i> Selesai</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 @endif
 
-
-{{-- ======================== DAFTAR BUKU ======================== --}}
-<div class="d-flex align-items-center gap-2 mb-3">
-    <h6 class="fw-bold mb-0">Daftar Buku</h6>
-    <span class="text-muted small">— pilih buku yang ingin dipinjam</span>
+{{-- ======================== SEKSI DAFTAR BUKU ======================== --}}
+<div class="d-flex align-items-center gap-2 mb-4">
+    <h5 class="fw-bolder text-dark mb-0">Daftar Koleksi Tersedia</h5>
 </div>
 
-{{-- Search + Filter (PHP Form GET, tanpa JavaScript) --}}
-<div class="card border-0 shadow-sm mb-3" style="border-radius: 14px;">
-    <div class="card-body p-3">
+{{-- Modern Search & Filter --}}
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+    <div class="card-body p-4">
         <form action="{{ route('user.books') }}" method="GET">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-7">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted">
-                            <i class="bi bi-search"></i>
+            <div class="row g-3">
+                <div class="col-lg-7 col-md-6">
+                    <div class="input-group modern-input-group shadow-sm">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                            <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0"
-                            placeholder="Cari judul buku, penulis, atau penerbit..."
-                            value="{{ request('search') }}"
-                            style="box-shadow: none;">
+                        <input type="text" name="search" class="form-control border-0 py-2 ps-2" 
+                            placeholder="Judul buku, penulis, atau penerbit..." 
+                            value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="filter" class="form-select" style="box-shadow: none;">
-                        <option value="all" {{ request('filter') == 'all' ? 'selected' : '' }}>Semua Buku</option>
-                        <option value="tersedia" {{ request('filter') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                        <option value="habis" {{ request('filter') == 'habis' ? 'selected' : '' }}>Stok Habis</option>
-                    </select>
+                <div class="col-lg-3 col-md-4">
+                    <div class="input-group modern-input-group shadow-sm">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                            <i class="bi bi-funnel text-muted"></i>
+                        </span>
+                        <select name="filter" class="form-select border-0 py-2 ps-2">
+                            <option value="all" {{ request('filter') == 'all' ? 'selected' : '' }}>Semua Stok</option>
+                            <option value="tersedia" {{ request('filter') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                            <option value="habis" {{ request('filter') == 'habis' ? 'selected' : '' }}>Stok Habis</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn w-100 fw-medium"
-                        style="background: #198754; color: white; border-radius: 8px; border: none;">
-                        <i class="bi bi-search me-1"></i> Cari
+                <div class="col-lg-2 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm btn-hover-scale">
+                        Cari
                     </button>
                 </div>
             </div>
         </form>
-
-        {{-- Tombol reset jika ada filter aktif --}}
+        
         @if(request('search') || (request('filter') && request('filter') != 'all'))
-        <div class="mt-2">
-            <a href="{{ route('user.books') }}" class="text-decoration-none small text-muted">
-                <i class="bi bi-x-circle me-1"></i> Reset pencarian
+        <div class="mt-3 text-center text-md-start">
+            <a href="{{ route('user.books') }}" class="btn btn-link btn-sm text-decoration-none text-muted fw-medium">
+                <i class="bi bi-x-lg me-1"></i> Bersihkan filter & cari ulang
             </a>
         </div>
         @endif
     </div>
 </div>
 
-{{-- Tabel Buku --}}
-<div class="card border-0 shadow-sm" style="border-radius: 14px;">
+{{-- Book Table Section --}}
+<div class="card border-0 premium-table-card shadow-sm" style="border-radius: 20px;">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table align-middle custom-modern-table mb-0">
                 <thead>
-                    <tr class="text-muted small" style="background: #f8f9fa;">
-                        <th class="fw-medium py-3 ps-4 border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">NO</th>
-                        <th class="fw-medium py-3 border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">JUDUL BUKU</th>
-                        <th class="fw-medium py-3 border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">PENULIS</th>
-                        <th class="fw-medium py-3 border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">PENERBIT</th>
-                        <th class="fw-medium py-3 border-0" style="font-size: 0.78rem; letter-spacing: 0.4px;">TAHUN</th>
-                        <th class="fw-medium py-3 border-0 text-center" style="font-size: 0.78rem; letter-spacing: 0.4px;">STOK</th>
-                        <th class="fw-medium py-3 border-0 text-center" style="font-size: 0.78rem; letter-spacing: 0.4px;">STATUS</th>
-                        <th class="fw-medium py-3 pe-4 border-0 text-center" style="font-size: 0.78rem; letter-spacing: 0.4px;">AKSI</th>
+                    <tr>
+                        <th class="border-0 fw-bold py-3 px-4 text-uppercase">No</th>
+                        <th class="border-0 fw-bold py-3 text-uppercase">Buku</th>
+                        <th class="border-0 fw-bold py-3 text-uppercase">Tahun</th>
+                        <th class="border-0 fw-bold py-3 text-center text-uppercase">Stok</th>
+                        <th class="border-0 fw-bold py-3 text-center text-uppercase px-4">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="border-top-0">
                     @forelse($books as $book)
                     @php
-                        $sudahAjukan = $pengajuan->whereIn('status', ['menunggu', 'dipinjam'])
+                        $sudahAjukan = $pengajuan->whereIn('status', ['menunggu', 'dipinjam', 'pending'])
                             ->where('book_id', $book->id)->count() > 0;
                     @endphp
-                    <tr>
-                        <td class="ps-4 text-muted">{{ $loop->iteration }}</td>
-
-                        <td>
+                    <tr class="table-row-hover">
+                        <td class="px-4 text-muted small fw-medium">{{ $loop->iteration }}</td>
+                        <td class="py-4">
                             <div class="d-flex align-items-center gap-3">
-                                @if($book->stok > 0)
-                                    <div style="width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(25,135,84,0.1);">
-                                        <i class="bi bi-book-fill" style="color: #198754;"></i>
-                                    </div>
-                                @else
-                                    <div style="width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(220,53,69,0.08);">
-                                        <i class="bi bi-book-fill" style="color: #dc3545;"></i>
-                                    </div>
-                                @endif
+                                <div class="modern-icon-box" style="background: rgba(16,185,129,0.08); color: #10b981;">
+                                    <i class="bi bi-book fs-5"></i>
+                                </div>
                                 <div>
-                                    <div class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ $book->judul }}</div>
+                                    <div class="fw-bold text-dark">{{ $book->judul }}</div>
+                                    <div class="text-secondary small">{{ $book->penulis }} • {{ $book->penerbit }}</div>
                                 </div>
                             </div>
                         </td>
-
-                        <td class="text-secondary" style="font-size: 0.88rem;">{{ $book->penulis }}</td>
-                        <td class="text-secondary" style="font-size: 0.88rem;">{{ $book->penerbit }}</td>
-                        <td class="text-secondary" style="font-size: 0.88rem;">{{ $book->tahun }}</td>
-
-                        <td class="text-center fw-semibold {{ $book->stok > 0 ? 'text-success' : 'text-danger' }}">
-                            {{ $book->stok }}
-                        </td>
-
+                        <td class="text-secondary fw-semibold small">{{ $book->tahun }}</td>
                         <td class="text-center">
                             @if($book->stok > 0)
-                                <span class="badge rounded-pill px-3 py-2"
-                                    style="background: rgba(25,135,84,0.1); color: #198754; font-size: 0.73rem;">
-                                    <i class="bi bi-dot me-1"></i>Tersedia
-                                </span>
+                                <div class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                                    {{ $book->stok }}
+                                </div>
                             @else
-                                <span class="badge rounded-pill px-3 py-2"
-                                    style="background: rgba(220,53,69,0.08); color: #dc3545; font-size: 0.73rem;">
-                                    <i class="bi bi-dot me-1"></i>Habis
-                                </span>
+                                <div class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                                    0
+                                </div>
                             @endif
                         </td>
-
-                        <td class="text-center pe-4">
+                        <td class="text-center px-4">
                             @if($sudahAjukan)
-                                <span class="badge px-3 py-2 fw-medium"
-                                    style="background: #fff7ed; color: #c2410c; border-radius: 8px; font-size: 0.78rem;">
-                                    <i class="bi bi-hourglass-split me-1"></i> Sudah Diajukan
-                                </span>
+                                <span class="modern-badge badge-warning px-4">Sudah Diajukan</span>
                             @elseif($book->stok > 0)
-                                {{-- Link ke halaman konfirmasi (tanpa JavaScript) --}}
-                                <a href="{{ route('user.konfirmasiPinjam', $book->id) }}"
-                                    class="btn btn-sm px-3 py-2 fw-medium"
-                                    style="background: #198754; color: white; border-radius: 8px; font-size: 0.82rem; border: none; text-decoration: none;">
-                                    <i class="bi bi-send me-1"></i> Ajukan
+                                <a href="{{ route('user.konfirmasiPinjam', $book->id) }}" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm btn-hover-scale">
+                                    <i class="bi bi-send-fill me-1"></i> Ajukan
                                 </a>
                             @else
-                                <span class="badge px-3 py-2 fw-medium"
-                                    style="background: #f8d7da; color: #dc3545; border-radius: 8px; font-size: 0.82rem;">
-                                    <i class="bi bi-x-circle me-1"></i> Habis
-                                </span>
+                                <button class="btn btn-light btn-sm rounded-pill px-4 fw-bold disabled opacity-50" disabled>
+                                    Stok Habis
+                                </button>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            @if(request('search'))
-                                <span class="fw-medium">Buku tidak ditemukan untuk "{{ request('search') }}"</span>
-                                <p class="small mt-1 mb-0">
-                                    <a href="{{ route('user.books') }}" class="text-decoration-none">Lihat semua buku</a>
-                                </p>
-                            @else
-                                <span class="fw-medium">Belum ada buku tersedia</span>
-                            @endif
+                        <td colspan="5" class="py-5 text-center">
+                            <div class="empty-state py-4 text-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                                    <i class="bi bi-inbox text-muted fs-1"></i>
+                                </div>
+                                <h6 class="fw-bolder">Data Tidak Ditemukan</h6>
+                                <p class="text-muted small">Coba cari dengan kata kunci lain atau bersihkan filter.</p>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -294,9 +234,59 @@
 </div>
 
 <style>
-    .book-row { transition: background 0.15s ease; }
-    .book-row:hover { background: #fafffe !important; }
-    .input-group-text, .form-control, .form-select { border-color: #e9ecef; }
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Outfit', sans-serif; background-color: #f4f7fb; }
+
+    .btn-hover-scale { transition: all 0.3s ease; }
+    .btn-hover-scale:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2); }
+
+    /* Modern Text Emerald */
+    .text-emerald { color: #10b981; }
+
+    /* Modern Table Card */
+    .premium-table-card { border-radius: 20px; border: none; overflow: hidden; }
+    .custom-modern-table thead th {
+        background: #f8fafc;
+        color: #94a3b8;
+        font-size: 0.72rem;
+        letter-spacing: 1.2px;
+        padding-top: 1.2rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+    .table-row-hover { transition: background 0.2s ease; }
+    .table-row-hover:hover { background: #f8fafc; }
+
+    /* Icon Box */
+    .modern-icon-box {
+        width: 44px; height: 44px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Input Group refinement */
+    .modern-input-group {
+        border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .modern-input-group:focus-within {
+        border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .modern-input-group .form-control:focus, .modern-input-group .form-select:focus {
+        box-shadow: none;
+    }
+
+    /* Badges Style */
+    .modern-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.5rem 1.25rem; border-radius: 100px;
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .badge-primary { background: #eff6ff; color: #3b82f6; }
+    .badge-success { background: #ecfdf5; color: #10b981; }
+    .badge-warning { background: #fff7ed; color: #f97316; }
+    .badge-danger  { background: #fef2f2; color: #ef4444; }
 </style>
 
 @endsection

@@ -8,10 +8,6 @@
     <div>
         <p class="text-muted small mb-0">Pantau peredaran buku, setujui pengajuan, dan status pengembalian.</p>
     </div>
-    <a href="/transactions/create" class="btn fw-semibold px-4"
-       style="background-color: #10b981; color: white; border-radius: 10px; border: none;">
-        + Pinjam Buku
-    </a>
 </div>
 
 @if(session('success'))

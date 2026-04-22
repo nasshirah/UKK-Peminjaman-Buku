@@ -49,12 +49,17 @@ Route::prefix('members')->group(function(){
 Route::prefix('transactions')->group(function(){
 
     Route::get('/', [TransactionController::class,'index'])->name('transactions.index');
-    Route::get('/create', [TransactionController::class,'create'])->name('transactions.create');
-    Route::post('/store', [TransactionController::class,'store'])->name('transactions.store');
     Route::get('/kembali/{id}', [TransactionController::class,'kembali'])->name('transactions.kembali');
     Route::get('/setujui/{id}', [TransactionController::class,'setujui'])->name('transactions.setujui');
     Route::get('/tolak/{id}', [TransactionController::class,'tolak'])->name('transactions.tolak');
 
+});
+
+/* LAPORAN */
+Route::prefix('laporan')->group(function(){
+    Route::get('/', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/excel', [\App\Http\Controllers\LaporanController::class, 'exportExcel'])->name('laporan.excel');
+    Route::get('/pdf', [\App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('laporan.pdf');
 });
 
 
@@ -66,6 +71,9 @@ Route::prefix('user')->group(function() {
     Route::get('/books/konfirmasi/{id}', [UserController::class, 'konfirmasiPinjam'])->name('user.konfirmasiPinjam');
     Route::post('/books/pinjam', [UserController::class, 'pinjamBuku'])->name('user.pinjamBuku');
     Route::get('/daftar-buku', [UserController::class, 'daftarBuku'])->name('user.daftarBuku');
-    Route::get('/pinjaman', [UserController::class, 'pinjaman'])->name('user.pinjaman');
+    Route::get('/riwayat/export/pdf', [UserController::class, 'exportPdf'])->name('user.riwayat.pdf');
+    Route::get('/riwayat/export/excel', [UserController::class, 'exportExcel'])->name('user.riwayat.excel');
     Route::get('/riwayat', [UserController::class, 'riwayat'])->name('user.riwayat');
+    Route::get('/pinjaman', [UserController::class, 'pinjaman'])->name('user.pinjaman');
+    Route::post('/pinjaman/kembalikan/{id}', [UserController::class, 'kembalikanBuku'])->name('user.kembalikanBuku');
 });
