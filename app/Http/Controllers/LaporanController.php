@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Transaction;
+use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\Book;
 use App\Models\Member;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class LaporanController extends Controller
         $sampai = $request->sampai;
         $status = $request->status;
 
-        $query = Transaction::with('member', 'book');
+        $query = Peminjaman::with('member', 'book', 'pengembalian');
 
         if ($dari) {
             $query->whereDate('tanggal_pinjam', '>=', $dari);
@@ -36,7 +37,7 @@ class LaporanController extends Controller
         // Statistik ringkasan
         $totalTransaksi = $transactions->count();
         $totalDipinjam = $transactions->where('status', 'dipinjam')->count();
-        $totalDikembalikan = $transactions->where('status', 'dikembalikan')->count();
+        $totalDikembalikan = $transactions->where('status', 'selesai')->count();
         $totalMenunggu = $transactions->where('status', 'menunggu')->count();
         $totalDitolak = $transactions->where('status', 'ditolak')->count();
 
@@ -58,7 +59,7 @@ class LaporanController extends Controller
         $sampai = $request->sampai;
         $status = $request->status;
 
-        $query = Transaction::with('member', 'book');
+        $query = Peminjaman::with('member', 'book', 'pengembalian');
 
         if ($dari) {
             $query->whereDate('tanggal_pinjam', '>=', $dari);
@@ -74,7 +75,7 @@ class LaporanController extends Controller
 
         $totalTransaksi = $transactions->count();
         $totalDipinjam = $transactions->where('status', 'dipinjam')->count();
-        $totalDikembalikan = $transactions->where('status', 'dikembalikan')->count();
+        $totalDikembalikan = $transactions->where('status', 'selesai')->count();
         $totalMenunggu = $transactions->where('status', 'menunggu')->count();
         $totalDitolak = $transactions->where('status', 'ditolak')->count();
 

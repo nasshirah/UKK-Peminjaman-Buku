@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Member;
-use App\Models\Transaction;
+use App\Models\Peminjaman;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -79,14 +79,14 @@ class AuthController extends Controller
         // STATISTIK
         $totalBuku = Book::count();
         $totalAnggota = Member::count();
-        $totalPeminjaman = Transaction::count();
+        $totalPeminjaman = Peminjaman::count();
 
         // GRAFIK DATA (Berdasarkan status transaksi)
         $grafikStatus = [
-            'pending' => Transaction::where('status', 'pending')->count(),
-            'dipinjam' => Transaction::where('status', 'dipinjam')->count(),
-            'dikembalikan' => Transaction::where('status', 'dikembalikan')->count(),
-            'ditolak' => Transaction::where('status', 'ditolak')->count(),
+            'pending' => Peminjaman::where('status', 'menunggu')->count(),
+            'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
+            'dikembalikan' => Peminjaman::where('status', 'selesai')->count(),
+            'ditolak' => Peminjaman::where('status', 'ditolak')->count(),
         ];
 
         return view('dashboard.index', compact(

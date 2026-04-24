@@ -22,7 +22,7 @@
                         <th class="border-0 fw-bold py-3 text-uppercase">Penerbit</th>
                         <th class="border-0 fw-bold py-3 text-uppercase">Tahun</th>
                         <th class="border-0 fw-bold py-3 text-center text-uppercase">Stok</th>
-                        <th class="border-0 fw-bold py-3 px-4 text-end text-uppercase">Status</th>
+                        <th class="border-0 fw-bold py-3 px-4 text-center text-uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="border-top-0">
@@ -43,11 +43,65 @@
                             <td class="text-secondary fw-medium">{{ $book->penerbit }}</td>
                             <td class="text-secondary fw-medium">{{ $book->tahun }}</td>
                             <td class="text-center fw-bold text-dark fs-5">{{ $book->stok }}</td>
-                            <td class="text-end px-4">
-                                @if($book->stok > 0)
-                                    <span class="modern-badge badge-success">Tersedia</span>
+                            <td class="text-center px-4">
+                                @if($book->stok <= 0)
+                                    {{-- Buku tidak tersedia --}}
+                                    <span class="modern-badge badge-danger">Tidak Tersedia</span>
+                                @elseif($pinjamAktif ?? false)
+                                    {{-- User masih ada pinjaman aktif --}}
+                                    <span class="modern-badge badge-warning" title="Anda masih memiliki peminjaman aktif.">Tidak bisa pinjam lagi</span>
                                 @else
-                                    <span class="modern-badge badge-danger">Habis</span>
+                                    {{-- Buku tersedia & user bisa pinjam --}}
+                                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm btn-hover-scale"
+                                        data-bs-toggle="modal" data-bs-target="#modalPinjam{{ $book->id }}">
+                                        <i class="bi bi-bookmark-plus-fill me-1"></i> Pinjam
+                                    </button>
+
+                                    {{-- Modal Pilih Tanggal Kembali --}}
+                                    <div class="modal fade" id="modalPinjam{{ $book->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                                            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                                                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                                                    <h6 class="modal-title fw-bold text-dark">Pinjam Buku</h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('user.pinjam', $book->id) }}" method="POST">
+                                                    @csrf
+                                                    <div class="modal-body px-4 py-3">
+                                                        <div class="mb-3">
+                                                            <div class="d-flex align-items-center gap-2 mb-3 p-3 rounded-3" style="background:#f8fafc;">
+                                                                <div style="width:36px; height:36px; border-radius:10px; background:rgba(29,78,216,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                                                    <i class="bi bi-book-fill" style="color:#1d4ed8;"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="fw-semibold text-dark" style="font-size:0.88rem;">{{ $book->judul }}</div>
+                                                                    <div class="text-muted" style="font-size:0.75rem;">{{ $book->penulis }}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <label class="form-label fw-semibold text-dark" style="font-size:0.85rem;">
+                                                            <i class="bi bi-calendar-event me-1"></i> Tanggal Pengembalian
+                                                        </label>
+                                                        <input type="date" name="tanggal_kembali" class="form-control"
+                                                            min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                                            max="{{ date('Y-m-d', strtotime('+30 days')) }}"
+                                                            value="{{ date('Y-m-d', strtotime('+7 days')) }}"
+                                                            required
+                                                            style="border-radius:10px; padding:10px 14px; border:1px solid #e2e8f0;">
+                                                        <div class="text-muted mt-1" style="font-size:0.72rem;">
+                                                            Maksimal 30 hari dari hari ini.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                                                        <button type="button" class="btn btn-light btn-sm rounded-pill px-3 fw-medium" data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                                                            <i class="bi bi-bookmark-plus-fill me-1"></i> Pinjam Sekarang
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
                             </td>
                         </tr>
@@ -88,10 +142,14 @@
     
     /* Modern Badges */
     .modern-badge {
-        padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+        display: inline-block; padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
     }
     .badge-success { background: #ecfdf5; color: #10b981; }
     .badge-danger  { background: #fef2f2; color: #ef4444; }
+    .badge-warning { background: #fffbeb; color: #b45309; }
+    
+    .btn-hover-scale { transition: all 0.25s ease; }
+    .btn-hover-scale:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25) !important; }
 </style>
 
 @endsection

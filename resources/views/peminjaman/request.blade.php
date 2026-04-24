@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('page_title', 'Transaksi Peminjaman')
+@section('page_title', 'Peminjaman')
 
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <p class="text-muted small mb-0">Pantau peredaran buku, setujui pengajuan, dan status pengembalian.</p>
+        <p class="text-muted small mb-0">Kelola pengajuan peminjaman buku dan pantau buku yang sedang dipinjam.</p>
     </div>
 </div>
 
@@ -23,10 +23,6 @@
 @endif
 
 {{-- ========================= PENGAJUAN MENUNGGU ========================= --}}
-@php
-    $menunggu = $transactions->where('status', 'menunggu');
-@endphp
-
 @if($menunggu->count() > 0)
 <div class="mb-4">
     <div class="d-flex align-items-center gap-2 mb-3">
@@ -41,7 +37,7 @@
         <div class="card-header border-0 px-4 py-3" style="background: #fff7ed;">
             <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-hourglass-split text-warning fs-5"></i>
-                <h6 class="fw-bold mb-0 text-warning" style="color: #c2410c !important;">Pengajuan Menunggu Persetujuan</h6>
+                <h6 class="fw-bold mb-0" style="color: #c2410c !important;">Pengajuan Menunggu Persetujuan</h6>
             </div>
         </div>
         <div class="table-responsive">
@@ -84,18 +80,22 @@
                         </td>
                         <td class="pe-4 text-end">
                             <div class="d-flex gap-2 justify-content-end">
-                                <a href="{{ route('transactions.setujui', $trx->id) }}"
-                                   class="btn btn-sm fw-semibold px-3 py-2"
-                                   style="background: #ecfdf5; color: #059669; border: 1px solid #059669; border-radius: 8px; font-size: 0.82rem;"
-                                   onclick="return confirm('Setujui pengajuan peminjaman dari {{ $trx->member->nama }}?')">
-                                    <i class="bi bi-check-lg me-1"></i> Setujui
-                                </a>
-                                <a href="{{ route('transactions.tolak', $trx->id) }}"
-                                   class="btn btn-sm fw-semibold px-3 py-2"
-                                   style="background: #fef2f2; color: #dc2626; border: 1px solid #dc2626; border-radius: 8px; font-size: 0.82rem;"
-                                   onclick="return confirm('Tolak pengajuan peminjaman dari {{ $trx->member->nama }}?')">
-                                    <i class="bi bi-x-lg me-1"></i> Tolak
-                                </a>
+                                <form action="{{ route('peminjaman.setujui', $trx->id) }}" method="POST"
+                                      onsubmit="return confirm('Setujui pengajuan peminjaman dari {{ $trx->member->nama }}?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm fw-semibold px-3 py-2"
+                                            style="background: #ecfdf5; color: #059669; border: 1px solid #059669; border-radius: 8px; font-size: 0.82rem;">
+                                        <i class="bi bi-check-lg me-1"></i> Setujui
+                                    </button>
+                                </form>
+                                <form action="{{ route('peminjaman.tolak', $trx->id) }}" method="POST"
+                                      onsubmit="return confirm('Tolak pengajuan peminjaman dari {{ $trx->member->nama }}?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm fw-semibold px-3 py-2"
+                                            style="background: #fef2f2; color: #dc2626; border: 1px solid #dc2626; border-radius: 8px; font-size: 0.82rem;">
+                                        <i class="bi bi-x-lg me-1"></i> Tolak
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -107,10 +107,10 @@
 </div>
 @endif
 
-{{-- ========================= SEMUA TRANSAKSI ========================= --}}
+{{-- ========================= SEMUA DATA PEMINJAMAN ========================= --}}
 <div class="d-flex align-items-center gap-2 mb-3">
-    <h6 class="fw-bold mb-0">Semua Transaksi</h6>
-    <span class="badge bg-light text-muted px-2" style="font-size: 0.75rem;">{{ $transactions->count() }} total</span>
+    <h6 class="fw-bold mb-0">Semua Data Peminjaman</h6>
+    <span class="badge bg-light text-muted px-2" style="font-size: 0.75rem;">{{ $peminjaman->count() }} total</span>
 </div>
 
 <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
@@ -122,13 +122,12 @@
                     <th class="py-3 fw-medium text-muted" style="font-size: 0.78rem;">ANGGOTA</th>
                     <th class="py-3 fw-medium text-muted" style="font-size: 0.78rem;">JUDUL BUKU</th>
                     <th class="py-3 fw-medium text-muted" style="font-size: 0.78rem;">TGL PINJAM</th>
-                    <th class="py-3 fw-medium text-muted" style="font-size: 0.78rem;">TGL KEMBALI</th>
                     <th class="py-3 fw-medium text-muted" style="font-size: 0.78rem;">STATUS</th>
                     <th class="pe-4 py-3 fw-medium text-muted text-end" style="font-size: 0.78rem;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($transactions as $trx)
+                @forelse($peminjaman as $trx)
                 <tr>
                     <td class="ps-4 text-muted">{{ $loop->iteration }}</td>
                     <td>
@@ -139,13 +138,6 @@
                     </td>
                     <td>
                         <div class="small"><i class="bi bi-calendar-event me-1"></i> {{ $trx->tanggal_pinjam }}</div>
-                    </td>
-                    <td>
-                        @if($trx->tanggal_kembali)
-                            <div class="small"><i class="bi bi-calendar-check me-1"></i> {{ $trx->tanggal_kembali }}</div>
-                        @else
-                            <span class="text-muted small">---</span>
-                        @endif
                     </td>
                     <td>
                         @if($trx->status == 'menunggu')
@@ -160,47 +152,44 @@
                             <span class="badge rounded-pill px-3 py-2" style="background: #fef2f2; color: #dc2626; font-weight: 500; font-size: 0.75rem;">
                                 <i class="bi bi-x-circle me-1"></i> Ditolak
                             </span>
-                        @else
-                            <span class="badge rounded-pill px-3 py-2" style="background-color: #f0fdf4; color: #15803d; font-weight: 500; font-size: 0.75rem;">
-                                <i class="bi bi-check-lg me-1"></i> Dikembalikan
-                            </span>
                         @endif
                     </td>
                     <td class="pe-4 text-end">
                         @if($trx->status == 'menunggu')
                             <div class="d-flex gap-1 justify-content-end">
-                                <a href="{{ route('transactions.setujui', $trx->id) }}"
-                                   class="btn btn-sm px-2 py-1"
-                                   style="background: #ecfdf5; color: #059669; border: 1px solid #059669; border-radius: 6px; font-size: 0.78rem;"
-                                   onclick="return confirm('Setujui?')">
-                                    <i class="bi bi-check-lg"></i> Setujui
-                                </a>
-                                <a href="{{ route('transactions.tolak', $trx->id) }}"
-                                   class="btn btn-sm px-2 py-1"
-                                   style="background: #fef2f2; color: #dc2626; border: 1px solid #dc2626; border-radius: 6px; font-size: 0.78rem;"
-                                   onclick="return confirm('Tolak?')">
-                                    <i class="bi bi-x-lg"></i> Tolak
-                                </a>
+                                <form action="{{ route('peminjaman.setujui', $trx->id) }}" method="POST"
+                                      onsubmit="return confirm('Setujui?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm px-2 py-1"
+                                            style="background: #ecfdf5; color: #059669; border: 1px solid #059669; border-radius: 6px; font-size: 0.78rem;">
+                                        <i class="bi bi-check-lg"></i> Setujui
+                                    </button>
+                                </form>
+                                <form action="{{ route('peminjaman.tolak', $trx->id) }}" method="POST"
+                                      onsubmit="return confirm('Tolak?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm px-2 py-1"
+                                            style="background: #fef2f2; color: #dc2626; border: 1px solid #dc2626; border-radius: 6px; font-size: 0.78rem;">
+                                        <i class="bi bi-x-lg"></i> Tolak
+                                    </button>
+                                </form>
                             </div>
                         @elseif($trx->status == 'dipinjam')
-                            <a href="{{ route('transactions.kembali', $trx->id) }}"
-                               class="btn btn-sm fw-bold px-3 py-2"
-                               style="background-color: #ecfdf5; color: #10b981; border: 1px solid #10b981; border-radius: 8px;"
-                               onclick="return confirm('Yakin buku sudah dikembalikan?')">
-                                <i class="bi bi-arrow-return-left me-1"></i> Kembali
-                            </a>
+                            <span class="badge bg-light text-muted fw-normal px-3 py-2" style="border-radius: 8px;">
+                                <i class="bi bi-clock-history me-1"></i> Sedang Dipinjam
+                            </span>
                         @else
                             <span class="badge bg-light text-muted fw-normal px-3 py-2" style="border-radius: 8px;">
-                                <i class="bi bi-check-circle me-1"></i> Selesai
+                                <i class="bi bi-dash me-1"></i> Selesai
                             </span>
                         @endif
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5 text-muted">
-                        <i class="bi bi-arrow-left-right fs-1 d-block mb-2 opacity-25"></i>
-                        Belum ada transaksi peminjaman.
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-book fs-1 d-block mb-2 opacity-25"></i>
+                        Belum ada data peminjaman.
                     </td>
                 </tr>
                 @endforelse

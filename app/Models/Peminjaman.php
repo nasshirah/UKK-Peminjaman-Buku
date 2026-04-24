@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class Peminjaman extends Model
 {
+    use HasFactory;
+
+    protected $table = 'peminjamans';
+
     protected $fillable = [
         'member_id',
         'book_id',
         'tanggal_pinjam',
         'tanggal_kembali',
-        'status'
+        'status',
     ];
 
     public function member()
@@ -22,5 +27,10 @@ class Transaction extends Model
     public function book()
     {
         return $this->belongsTo(Book::class);
+    }
+
+    public function pengembalian()
+    {
+        return $this->hasOne(Pengembalian::class, 'peminjaman_id');
     }
 }

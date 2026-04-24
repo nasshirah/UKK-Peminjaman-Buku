@@ -44,15 +44,19 @@ Route::prefix('members')->group(function(){
 });
 
 
-/* TRANSACTIONS */
+/* PEMINJAMAN */
+use App\Http\Controllers\PeminjamanController;
+Route::prefix('peminjaman')->group(function(){
+    Route::get('/request', [PeminjamanController::class,'peminjaman'])->name('peminjaman.request');
+    Route::post('/setujui/{id}', [PeminjamanController::class,'setujui'])->name('peminjaman.setujui');
+    Route::post('/tolak/{id}', [PeminjamanController::class,'tolak'])->name('peminjaman.tolak');
+});
 
-Route::prefix('transactions')->group(function(){
-
-    Route::get('/', [TransactionController::class,'index'])->name('transactions.index');
-    Route::get('/kembali/{id}', [TransactionController::class,'kembali'])->name('transactions.kembali');
-    Route::get('/setujui/{id}', [TransactionController::class,'setujui'])->name('transactions.setujui');
-    Route::get('/tolak/{id}', [TransactionController::class,'tolak'])->name('transactions.tolak');
-
+/* PENGEMBALIAN */
+use App\Http\Controllers\PengembalianController;
+Route::prefix('pengembalian')->group(function(){
+    Route::get('/', [PengembalianController::class,'index'])->name('pengembalian.index');
+    Route::post('/setujui/{id}', [PengembalianController::class,'setujuiKembali'])->name('pengembalian.setujui');
 });
 
 /* LAPORAN */
@@ -68,12 +72,12 @@ Route::prefix('laporan')->group(function(){
 Route::prefix('user')->group(function() {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/books', [UserController::class, 'books'])->name('user.books');
-    Route::get('/books/konfirmasi/{id}', [UserController::class, 'konfirmasiPinjam'])->name('user.konfirmasiPinjam');
-    Route::post('/books/pinjam', [UserController::class, 'pinjamBuku'])->name('user.pinjamBuku');
+    Route::post('/pinjam/{id}', [UserController::class, 'pinjam'])->name('user.pinjam');
     Route::get('/daftar-buku', [UserController::class, 'daftarBuku'])->name('user.daftarBuku');
     Route::get('/riwayat/export/pdf', [UserController::class, 'exportPdf'])->name('user.riwayat.pdf');
     Route::get('/riwayat/export/excel', [UserController::class, 'exportExcel'])->name('user.riwayat.excel');
     Route::get('/riwayat', [UserController::class, 'riwayat'])->name('user.riwayat');
-    Route::get('/pinjaman', [UserController::class, 'pinjaman'])->name('user.pinjaman');
+    Route::get('/pengembalian', [UserController::class, 'pengembalian'])->name('user.pengembalian');
+    Route::get('/pinjaman/konfirmasi/{id}', [UserController::class, 'konfirmasiKembali'])->name('user.konfirmasiKembali');
     Route::post('/pinjaman/kembalikan/{id}', [UserController::class, 'kembalikanBuku'])->name('user.kembalikanBuku');
 });

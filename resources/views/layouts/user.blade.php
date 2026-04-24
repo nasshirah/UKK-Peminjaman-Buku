@@ -102,9 +102,10 @@
     <a href="{{ route('user.books') }}" class="{{ request()->routeIs('user.books') ? 'active' : '' }}">
         <i class="bi bi-journal-arrow-up"></i> Peminjaman
     </a>
-    <a href="{{ route('user.pinjaman') }}" class="{{ request()->routeIs('user.pinjaman') ? 'active' : '' }}">
+    <a href="{{ route('user.pengembalian') }}" class="{{ request()->routeIs('user.pengembalian') ? 'active' : '' }}">
         <i class="bi bi-journal-arrow-down"></i> Pengembalian
     </a>
+
     <a href="{{ route('user.riwayat') }}" class="{{ request()->routeIs('user.riwayat') ? 'active' : '' }}">
         <i class="bi bi-clock-history"></i> Riwayat
     </a>
@@ -121,5 +122,6 @@
     @yield('content')
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

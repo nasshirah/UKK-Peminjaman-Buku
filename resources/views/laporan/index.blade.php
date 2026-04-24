@@ -172,7 +172,13 @@
                         <div class="d-inline-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill x-small fw-bold text-secondary">
                             <span>{{ \Carbon\Carbon::parse($trx->tanggal_pinjam)->format('d M') }}</span>
                             <i class="bi bi-arrow-right text-muted opacity-50"></i>
-                            <span>{{ $trx->tanggal_kembali ? \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d M') : '---' }}</span>
+                            <span>
+                                @if($trx->pengembalian && $trx->status == 'selesai')
+                                    {{ \Carbon\Carbon::parse($trx->pengembalian->tanggal_kembali)->format('d M') }}
+                                @else
+                                    {{ $trx->tanggal_kembali ? \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d M') : '---' }}
+                                @endif
+                            </span>
                         </div>
                     </td>
                     <td class="pe-4 text-end">

@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Book;
-use App\Models\Transaction;
+use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -18,14 +19,14 @@ class UserController extends Controller
         }
 
         $totalBuku = Book::count(); 
-        $totalPinjaman = Transaction::where('member_id', session('user_id'))
+        $totalPinjaman = Peminjaman::where('member_id', session('user_id'))
             ->whereIn('status', ['dipinjam', 'menunggu']) 
             ->count(); 
         
-        $totalRiwayat = Transaction::where('member_id', session('user_id'))->count();
+        $totalRiwayat = Peminjaman::where('member_id', session('user_id'))->count();
 
         // Ambil 5 riwayat transaksi terbaru
-        $riwayatTerbaru = Transaction::with('book')
+        $riwayatTerbaru = Peminjaman::with('book')
             ->where('member_id', session('user_id'))
             ->latest()
             ->take(5)
@@ -35,63 +36,91 @@ class UserController extends Controller
     }
 
   
-    // LIST BUKU (UNTUK PINJAM)
+    // LIST BUKU (UNTUK PINJAM) *Sekarang difungsikan sebagai status peminjaman*
     public function books(Request $request)
     {
         if (!session('user_id') || session('role') != 'user') {
             return redirect('/');
         }
 
-        // Query builder untuk buku
-        $query = Book::query();
+        // Ambil data peminjaman aktif atau menunggu untuk ditampilkan di tabel
+        $pinjamanAktif = Peminjaman::with('book')
+            ->where('member_id', session('user_id'))
+            ->whereIn('status', ['dipinjam', 'menunggu'])
+            ->latest()
+            ->get();
 
-        // Filter pencarian (server-side, tanpa JavaScript)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('judul', 'like', '%' . $search . '%')
-                  ->orWhere('penulis', 'like', '%' . $search . '%')
-                  ->orWhere('penerbit', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Filter status stok
-        if ($request->filled('filter') && $request->filter != 'all') {
-            if ($request->filter == 'tersedia') {
-                $query->where('stok', '>', 0);
-            } elseif ($request->filter == 'habis') {
-                $query->where('stok', '<=', 0);
-            }
-        }
-
-        $books = $query->latest()->get();
-
-        $pengajuan = Transaction::with('book')
+        // Ambil semua data peminjaman (termasuk ditolak) untuk tabel lengkap
+        $semuaPeminjaman = Peminjaman::with('book')
             ->where('member_id', session('user_id'))
             ->whereIn('status', ['menunggu', 'dipinjam', 'ditolak'])
             ->latest()
             ->get();
 
-        return view('user.peminjaman.index', compact('books', 'pengajuan'));
+        return view('user.peminjaman.index', compact('pinjamanAktif', 'semuaPeminjaman'));
+    }
+
+    // HALAMAN PENGEMBALIAN BUKU *Menampilkan buku yang sudah dipinjam*
+    public function pengembalian()
+    {
+        if (!session('user_id') || session('role') != 'user') {
+            return redirect('/');
+        }
+
+        // Ambil data peminjaman yang sedang aktif (dipinjam) saja
+        $pinjamanAktif = Peminjaman::with('book', 'pengembalian')
+            ->where('member_id', session('user_id'))
+            ->where('status', 'dipinjam')
+            ->whereDoesntHave('pengembalian')
+            ->latest()
+            ->get();
+
+        // Ambil semua data pengembalian (dikembalikan) untuk tabel lengkap
+        $semuaPengembalian = Peminjaman::with('book', 'pengembalian')
+            ->where('member_id', session('user_id'))
+            ->whereHas('pengembalian')
+            ->latest()
+            ->get();
+
+        return view('user.pengembalian.index', compact('pinjamanAktif', 'semuaPengembalian'));
     }
 
     
-    // HALAMAN KONFIRMASI PINJAM
-    public function konfirmasiPinjam($id)
+    // PINJAM BUKU LANGSUNG (direct borrow, tanpa persetujuan admin)
+    public function pinjam(Request $request, $id)
     {
-    
         if (!session('user_id') || session('role') != 'user') {
             return redirect('/');
         }
 
         $book = Book::findOrFail($id);
 
-        $sudahAjukan = Transaction::where('member_id', session('user_id'))
-            ->where('book_id', $id)
-            ->whereIn('status', ['menunggu', 'dipinjam'])
-            ->exists();
+        // Validasi 1: Buku harus tersedia (stok > 0)
+        if ($book->stok <= 0) {
+            return back()->with('error', 'Maaf, buku "' . $book->judul . '" tidak tersedia saat ini.');
+        }
 
-        return view('user.peminjaman.konfirmasi', compact('book', 'sudahAjukan'));
+        // Validasi 2: User tidak boleh punya peminjaman aktif atau yang sedang menunggu
+        $pinjamAktif = Peminjaman::where('member_id', session('user_id'))
+            ->whereIn('status', ['dipinjam', 'menunggu'])
+            ->first();
+
+        if ($pinjamAktif) {
+            $pesan = $pinjamAktif->status == 'menunggu' ? 'menunggu persetujuan' : 'aktif';
+            return back()->with('error', 'Anda masih memiliki peminjaman '.$pesan.' untuk buku "' . $pinjamAktif->book->judul . '".');
+        }
+
+        // Simpan transaksi dengan status "menunggu"
+        Peminjaman::create([
+            'member_id'       => session('user_id'),
+            'book_id'         => $book->id,
+            'tanggal_pinjam'  => date('Y-m-d'),
+            'tanggal_kembali' => $request->tanggal_kembali,
+            'status'          => 'menunggu',
+        ]);
+
+        return redirect()->route('user.books')
+            ->with('success', 'Pengajuan pinjam buku "' . $book->judul . '" berhasil dikirim! Menunggu persetujuan Admin.');
     }
 
   
@@ -103,8 +132,13 @@ class UserController extends Controller
         }
 
         $books = Book::latest()->get();
+        
+        // Cek apakah user masih punya peminjaman aktif atau menunggu
+        $pinjamAktif = Peminjaman::where('member_id', session('user_id'))
+            ->whereIn('status', ['dipinjam', 'menunggu'])
+            ->exists();
 
-        return view('user.buku.index', compact('books'));
+        return view('user.buku.index', compact('books', 'pinjamAktif'));
     }
 
     // RIWAYAT PINJAMAN
@@ -114,7 +148,8 @@ class UserController extends Controller
             return redirect('/');
         }
 
-        $transactions = Transaction::with('book')
+        // Ambil gabungan data (Peminjaman)
+        $transactions = Peminjaman::with('book', 'pengembalian')
             ->where('member_id', session('user_id')) 
             ->latest() 
             ->get();
@@ -129,7 +164,7 @@ class UserController extends Controller
             return redirect('/');
         }
 
-        $transactions = Transaction::with('book')
+        $transactions = Peminjaman::with('book', 'pengembalian')
             ->where('member_id', session('user_id'))
             ->latest()
             ->get();
@@ -148,84 +183,46 @@ class UserController extends Controller
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\UserRiwayatExport(session('user_id')), 'riwayat_peminjaman_'.date('Ymd_His').'.xlsx');
     }
 
-    // HALAMAN PENGEMBALIAN / PINJAMAN AKTIF
-    public function pinjaman()
+    // HALAMAN KONFIRMASI PENGEMBALIAN BUKU
+    public function konfirmasiKembali($id)
     {
         if (!session('user_id') || session('role') != 'user') {
             return redirect('/');
         }
 
-        $transactions = Transaction::with('book')
+        $trx = Peminjaman::with('book')
+            ->where('id', $id)
             ->where('member_id', session('user_id'))
-            ->whereIn('status', ['dipinjam', 'menunggu']) 
-            ->latest()
-            ->get();
+            ->where('status', 'dipinjam')
+            ->firstOrFail();
 
-        return view('user.pengembalian.index', compact('transactions'));
+        return view('user.pengembalian.konfirmasi', compact('trx'));
     }
 
-    // KEMBALIKAN BUKU
+    // KEMBALIKAN BUKU (Ajukan pengembalian - menunggu persetujuan admin)
     public function kembalikanBuku($id)
     {
         if (!session('user_id') || session('role') != 'user') {
             return redirect('/');
         }
 
-        $transaction = Transaction::where('id', $id)
+        $peminjaman = Peminjaman::where('id', $id)
             ->where('member_id', session('user_id'))
             ->where('status', 'dipinjam')
             ->firstOrFail();
 
-        $book = Book::findOrFail($transaction->book_id);
-
-        // Update status transaksi
-        $transaction->update([
+        // Buat record pengembalian baru
+        Pengembalian::create([
+            'peminjaman_id' => $peminjaman->id,
             'tanggal_kembali' => date('Y-m-d'),
-            'status' => 'dikembalikan',
+            'status' => 'menunggu',
         ]);
 
-        // Stok buku bertambah kembali
-        $book->stok += 1;
-        $book->save();
-
-        return redirect()->route('user.pinjaman')->with('success', 'Buku "' . $book->judul . '" berhasil dikembalikan!');
+        return redirect()->route('user.pengembalian')->with('success', 'Pengajuan pengembalian buku "' . $peminjaman->book->judul . '" berhasil dikirim! Menunggu persetujuan Admin.');
     }
 
     public function pinjamBuku(Request $request)
     {
-        if (!session('user_id') || session('role') != 'user') {
-            return redirect('/');
-        }
-
-        $request->validate([
-            'book_id'         => 'required|exists:books,id',
-            'tanggal_pinjam'  => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-        ]);
-
-        $book = Book::findOrFail($request->book_id);
-
-        // Cek stok
-        if ($book->stok <= 0) {
-            return back()->with('error', 'Maaf, stok buku "' . $book->judul . '" sudah habis.');
-        }
-
-        $pengajuanAktif = Transaction::where('member_id', session('user_id'))
-            ->where('book_id', $request->book_id)
-            ->whereIn('status', ['menunggu', 'dipinjam'])
-            ->exists();
-
-        if ($pengajuanAktif) {
-            return back()->with('error', 'Kamu sudah memiliki pengajuan aktif untuk buku ini.');
-        }
-
-        Transaction::create([
-            'member_id'       => session('user_id'),
-            'book_id'         => $request->book_id,
-            'tanggal_pinjam'  => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'status'          => 'menunggu',
-        ]);
-        return redirect()->route('user.books')->with('success', 'Pengajuan peminjaman buku "' . $book->judul . '" berhasil dikirim! Tunggu persetujuan admin.');
+        return redirect()->route('user.books')->with('error', 'Silakan gunakan tombol Pinjam pada halaman daftar buku.');
     }
 }

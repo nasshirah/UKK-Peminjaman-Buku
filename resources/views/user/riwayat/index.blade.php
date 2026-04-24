@@ -44,13 +44,19 @@
                                 </div>
                             </td>
                             <td class="text-secondary fw-medium">{{ \Carbon\Carbon::parse($trx->tanggal_pinjam)->format('d M Y') }}</td>
-                            <td class="text-secondary fw-medium">{{ \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d M Y') }}</td>
+                            <td class="text-secondary fw-medium">
+                                @if($trx->pengembalian && $trx->pengembalian->status == 'disetujui')
+                                    {{ \Carbon\Carbon::parse($trx->pengembalian->tanggal_kembali)->format('d M Y') }}
+                                @else
+                                    {{ $trx->tanggal_kembali ? \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d M Y') : '—' }}
+                                @endif
+                            </td>
                             <td class="text-end px-4">
-                                @if($trx->status == 'pending' || $trx->status == 'menunggu')
+                                @if($trx->status == 'menunggu')
                                     <span class="modern-badge badge-warning">Menunggu</span>
                                 @elseif($trx->status == 'dipinjam')
                                     <span class="modern-badge badge-primary">Dipinjam</span>
-                                @elseif($trx->status == 'dikembalikan')
+                                @elseif($trx->status == 'selesai')
                                     <span class="modern-badge badge-success">Selesai</span>
                                 @else
                                     <span class="modern-badge badge-danger">Ditolak</span>

@@ -66,8 +66,14 @@
                 <td>{{ $trx->member->nama }}</td>
                 <td>{{ $trx->book->judul }}</td>
                 <td class="text-center">{{ \Carbon\Carbon::parse($trx->tanggal_pinjam)->format('d/m/Y') }}</td>
-                <td class="text-center">{{ $trx->tanggal_kembali ? \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d/m/Y') : '-' }}</td>
-                <td class="text-center">{{ ucfirst($trx->status) }}</td>
+                <td class="text-center">
+                    @if($trx->pengembalian && $trx->status == 'selesai')
+                        {{ \Carbon\Carbon::parse($trx->pengembalian->tanggal_kembali)->format('d/m/Y') }}
+                    @else
+                        {{ $trx->tanggal_kembali ? \Carbon\Carbon::parse($trx->tanggal_kembali)->format('d/m/Y') : '-' }}
+                    @endif
+                </td>
+                <td class="text-center">{{ $trx->status == 'selesai' ? 'Dikembalikan' : ucfirst($trx->status) }}</td>
             </tr>
             @empty
             <tr>

@@ -50,7 +50,8 @@
             <a href="/dashboard" class="{{ Request::is('dashboard') ? 'active' : '' }}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
             <a href="/books" class="{{ Request::is('books*') ? 'active' : '' }}"><i data-lucide="book-open"></i> Data Buku</a>
             <a href="/members" class="{{ Request::is('members*') ? 'active' : '' }}"><i data-lucide="users"></i> Data Anggota</a>
-            <a href="/transactions" class="{{ Request::is('transactions*') ? 'active' : '' }}"><i data-lucide="arrow-left-right"></i> Transaksi</a>
+            <a href="{{ route('peminjaman.request') }}" class="{{ Request::is('peminjaman/request*') ? 'active' : '' }}"><i data-lucide="book-up"></i> Peminjaman</a>
+            <a href="{{ route('pengembalian.index') }}" class="{{ Request::is('pengembalian*') ? 'active' : '' }}"><i data-lucide="book-down"></i> Pengembalian</a>
             <a href="{{ route('laporan.index') }}" class="{{ Request::is('laporan*') ? 'active' : '' }}"><i data-lucide="file-bar-chart"></i> Laporan</a>
             <div class="logout-link">
                 <hr class="mx-3 my-3 text-muted">
