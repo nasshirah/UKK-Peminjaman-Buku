@@ -31,9 +31,14 @@
                             <td class="text-muted fw-medium px-4">{{ $loop->iteration }}</td>
                             <td class="fw-semibold py-4 text-dark">
                                 <div class="d-flex align-items-center">
-                                    <div class="bg-light rounded p-2 me-3 d-flex align-items-center justify-content-center text-primary flex-shrink-0" style="width:45px; height:45px;">
+                                    @if($book->gambar)
+                                    <img src="{{ asset('storage/' . $book->gambar) }}" alt="{{ $book->judul }}" 
+                                         class="me-3 flex-shrink-0" style="width:45px; height:60px; object-fit:cover; border-radius:8px;">
+                                    @else
+                                    <div class="bg-light rounded p-2 me-3 d-flex align-items-center justify-content-center text-primary flex-shrink-0" style="width:45px; height:60px;">
                                         <i class="bi bi-book fs-5"></i>
                                     </div>
+                                    @endif
                                     <div>
                                         <div class="mb-1 text-truncate" style="max-width: 250px;" title="{{ $book->judul }}">{{ $book->judul }}</div>
                                         <div class="text-secondary small fw-medium"><i class="bi bi-person me-1"></i> {{ $book->penulis }}</div>

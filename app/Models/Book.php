@@ -11,6 +11,7 @@ class Book extends Model
         'penulis',
         'penerbit',
         'tahun',
-        'stok'
+        'stok',
+        'gambar'
     ];
 }

@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Hash;
 class MemberController extends Controller
 {
 
-    // =========================
     // LIST DATA ANGGOTA
-    // =========================
     public function index()
     {
         $members = Member::latest()->get(); // biar data terbaru di atas
@@ -19,18 +17,14 @@ class MemberController extends Controller
     }
 
 
-    // =========================
     // HALAMAN TAMBAH
-    // =========================
     public function create()
     {
         return view('members.create');
     }
 
 
-    // =========================
     // SIMPAN DATA
-    // =========================
     public function store(Request $request)
     {
         // VALIDASI
@@ -54,9 +48,7 @@ class MemberController extends Controller
     }
 
 
-    // =========================
     // HALAMAN EDIT
-    // =========================
     public function edit($id)
     {
         $member = Member::findOrFail($id);
@@ -64,9 +56,7 @@ class MemberController extends Controller
     }
 
 
-    // =========================
     // UPDATE DATA
-    // =========================
     public function update(Request $request, $id)
     {
         $member = Member::findOrFail($id);
@@ -98,9 +88,7 @@ class MemberController extends Controller
     }
 
 
-    // =========================
     // HAPUS DATA
-    // =========================
     public function delete($id)
     {
         $member = Member::findOrFail($id);

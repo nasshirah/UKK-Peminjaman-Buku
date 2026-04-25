@@ -13,3 +13,4 @@ class Member extends Model
         'role'
     ];
 }
+

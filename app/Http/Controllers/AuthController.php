@@ -11,18 +11,14 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
-    // =========================
     // HALAMAN LOGIN
-    // =========================
     public function login()
     {
         return view('auth.login');
     }
 
 
-    // =========================
     // PROSES LOGIN
-    // =========================
     public function loginProcess(Request $request)
     {
 
@@ -65,9 +61,8 @@ class AuthController extends Controller
     }
 
 
-    // =========================
+    
     // DASHBOARD ADMIN
-    // =========================
     public function dashboard()
     {
 
@@ -98,9 +93,8 @@ class AuthController extends Controller
     }
 
 
-    // =========================
+    
     // LOGOUT
-    // =========================
     public function logout()
     {
         session()->flush();

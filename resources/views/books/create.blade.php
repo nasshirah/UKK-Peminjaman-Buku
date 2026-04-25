@@ -12,7 +12,7 @@ Tambah Buku
 
 <div class="card-body">
 
-<form action="{{ route('books.store') }}" method="POST">
+<form action="{{ route('books.store') }}" method="POST" enctype="multipart/form-data">
 
 @csrf
 
@@ -39,6 +39,12 @@ Tambah Buku
 <div class="mb-3">
 <label class="form-label">Stok</label>
 <input type="number" name="stok" class="form-control" placeholder="Masukkan jumlah stok" required>
+</div>
+
+<div class="mb-3">
+<label class="form-label">Gambar Buku</label>
+<input type="file" name="gambar" class="form-control" accept="image/*">
+<small class="text-muted">Format: JPG, PNG, JPEG. Maks 2MB. (Opsional)</small>
 </div>
 
 <button type="submit" class="btn btn-primary">
